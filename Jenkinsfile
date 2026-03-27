@@ -171,9 +171,34 @@ pipeline {
         }
         success {
             echo "Пайплайн успешно выполнен для окружения ${params.ENVIRONMENT}!"
+            mail(
+                to: '2689715995real@gmail.com',
+                subject: "✅ Jenkins Pipeline SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+Пайплайн успешно выполнен!
+
+Задача: ${env.JOB_NAME}
+Сборка: #${env.BUILD_NUMBER}
+Окружение: ${params.ENVIRONMENT}
+Студент: ${params.STUDENT_NAME}
+Ссылка: ${env.BUILD_URL}
+                """
+            )
         }
         failure {
             echo 'Пайплайн завершился с ошибкой. Проверьте логи.'
+            mail(
+                to: '2689715995real@gmail.com',
+                subject: "❌ Jenkins Pipeline FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+Пайплайн завершился с ошибкой!
+
+Задача: ${env.JOB_NAME}
+Сборка: #${env.BUILD_NUMBER}
+Окружение: ${params.ENVIRONMENT}
+Ссылка на логи: ${env.BUILD_URL}console
+                """
+            )
         }
     }
 }
