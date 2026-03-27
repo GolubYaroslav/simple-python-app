@@ -145,14 +145,25 @@ pipeline {
             }
         }
     }
-
-    post {
+post {
         always {
             echo 'Очистка рабочего пространства...'
             cleanWs()
         }
         success {
             echo "Пайплайн успешно выполнен для окружения ${params.ENVIRONMENT}!"
+            script {
+                if (params.ENVIRONMENT == 'production') {
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                        sh """
+                            git config user.email "jenkins@example.com"
+                            git config user.name "Jenkins"
+                            git tag -a v${BUILD_NUMBER} -m "Release version ${BUILD_NUMBER}"
+                            git push https://${GIT_USER}:${GIT_TOKEN}@github.com/GolubYaroslav/simple-python-app.git v${BUILD_NUMBER}
+                        """
+                    }
+                }
+            }
         }
         failure {
             echo 'Пайплайн завершился с ошибкой. Проверьте логи.'
