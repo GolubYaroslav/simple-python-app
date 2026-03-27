@@ -145,11 +145,7 @@ pipeline {
             }
         }
     }
-post {
-        always {
-            echo 'Очистка рабочего пространства...'
-            cleanWs()
-        }
+        post {
         success {
             echo "Пайплайн успешно выполнен для окружения ${params.ENVIRONMENT}!"
             script {
@@ -159,11 +155,15 @@ post {
                             git config user.email "jenkins@example.com"
                             git config user.name "Jenkins"
                             git tag -a v${BUILD_NUMBER} -m "Release version ${BUILD_NUMBER}"
-                            git push https://${GIT_USER}:${GIT_TOKEN}@github.com/GolubYaroslav/simple-python-app.git v${BUILD_NUMBER}
+                            git push https://${GIT_USER}:\${GIT_TOKEN}@github.com/GolubYaroslav/simple-python-app.git v${BUILD_NUMBER}
                         """
                     }
                 }
             }
+        }
+        always {
+            echo 'Очистка рабочего пространства...'
+            cleanWs()
         }
         failure {
             echo 'Пайплайн завершился с ошибкой. Проверьте логи.'
