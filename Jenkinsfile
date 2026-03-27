@@ -145,7 +145,8 @@ pipeline {
             }
         }
     }
-        post {
+
+    post {
         success {
             echo "Пайплайн успешно выполнен для окружения ${params.ENVIRONMENT}!"
             script {
