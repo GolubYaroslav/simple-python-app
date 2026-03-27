@@ -144,27 +144,33 @@ pipeline {
                 echo "Приложение доступно на порту 80"
             }
         }
+
+        stage('Tag Release') {
+            when {
+                expression { params.ENVIRONMENT == 'production' }
+            }
+            steps {
+                echo "Создание Git тега v${BUILD_NUMBER}..."
+                withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    sh """
+                        git config user.email "jenkins@example.com"
+                        git config user.name "Jenkins"
+                        git tag -a v${BUILD_NUMBER} -m "Release version ${BUILD_NUMBER}"
+                        git push https://${GIT_USER}:\${GIT_TOKEN}@github.com/GolubYaroslav/simple-python-app.git v${BUILD_NUMBER}
+                    """
+                }
+                echo "Тег v${BUILD_NUMBER} успешно создан!"
+            }
+        }
     }
 
     post {
-        success {
-            echo "Пайплайн успешно выполнен для окружения ${params.ENVIRONMENT}!"
-            script {
-                if (params.ENVIRONMENT == 'production') {
-                    withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-                        sh """
-                            git config user.email "jenkins@example.com"
-                            git config user.name "Jenkins"
-                            git tag -a v${BUILD_NUMBER} -m "Release version ${BUILD_NUMBER}"
-                            git push https://${GIT_USER}:\${GIT_TOKEN}@github.com/GolubYaroslav/simple-python-app.git v${BUILD_NUMBER}
-                        """
-                    }
-                }
-            }
-        }
         always {
             echo 'Очистка рабочего пространства...'
             cleanWs()
+        }
+        success {
+            echo "Пайплайн успешно выполнен для окружения ${params.ENVIRONMENT}!"
         }
         failure {
             echo 'Пайплайн завершился с ошибкой. Проверьте логи.'
